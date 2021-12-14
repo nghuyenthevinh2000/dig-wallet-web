@@ -7,49 +7,42 @@ import { getMultisigAccount } from "../../../lib/multisigHelpers";
 import HashView from "../../../components/dataViews/HashView";
 import MultisigHoldings from "../../../components/dataViews/MultisigHoldings";
 import MultisigMembers from "../../../components/dataViews/MultisigMembers";
-import ComponentsAddress from "../../../components/dataViews/componentsAddress";
 import Page from "../../../components/layout/Page";
 import StackableContainer from "../../../components/layout/StackableContainer";
 import TransactionForm from "../../../components/forms/TransactionForm";
-import TransactionFormAny from "../../../components/forms/TransactionFormAny";
+import TransactionList from "../../../components/dataViews/TransactionList";
+import ConnectWallet from "../../../components/forms/ConnectWallet";
 
 export async function getServerSideProps(context) {
   let holdings;
-
   try {
     const client = await StargateClient.connect(
       process.env.NEXT_PUBLIC_NODE_ADDRESS
     );
     const multisigAddress = context.params.address;
-    const accountOnChain = await getMultisigAccount(multisigAddress, client);
-    if(accountOnChain.pubkey.type != "tendermint/PubKeyMultisigThreshold"){
-
-      return {
-        props: { error: "This is not a multisig address", holdings: 0}
-      }
-    }
-    console.log(accountOnChain)
     holdings = await client.getBalance(
       multisigAddress,
       process.env.NEXT_PUBLIC_DENOM
     );
-    console.log(accountOnChain)
+    const accountOnChain = await getMultisigAccount(multisigAddress, client);
+
     return {
-      props: { accountOnChain, holdings: holdings.amount / 1000000, pubkeys: accountOnChain.pubkey.value.pubkeys},
+      props: { accountOnChain, holdings: holdings.amount / 1000000 },
     };
   } catch (error) {
     console.log(error);
     return {
-      props: { error: error.message, holdings: 0},
+      props: { error: error.message, holdings: 0 },
     };
   }
 }
 
+function ConnectWalletKeplr(){
+  console.log("vuong")
+}
+
 const multipage = (props) => {
   const [showTxForm, setShowTxForm] = useState(false);
-  const [showTxForm1, setShowTxForm1] = useState(false);
-  const [showCreate, setShowCreate] = useState(true);
-
   const router = useRouter();
   const { address } = router.query;
   return (
@@ -61,13 +54,11 @@ const multipage = (props) => {
             <HashView hash={address} />
           </h1>
         </StackableContainer>
-        {props.m}
         {props.error && (
           <StackableContainer>
             <div className="multisig-error">
-              <p>Error: {props.error} !!!!</p>
               <p>
-                This multisig address's pubkeys are INVALID or UNAVAILABLE, and so it
+                This multisig address's pubkeys are not available, and so it
                 cannot be used with this tool.
               </p>
               <p>
@@ -79,14 +70,6 @@ const multipage = (props) => {
             </div>
           </StackableContainer>
         )}
-        <br/>
-        <div>
-          <ComponentsAddress pubkeys = {props.pubkeys} />
-        </div>
-        <br/>
-        <div>
-          <MultisigHoldings holdings={props.holdings} />
-        </div>
         {showTxForm ? (
           <TransactionForm
             address={address}
@@ -94,63 +77,81 @@ const multipage = (props) => {
             holdings={props.holdings}
             closeForm={() => {
               setShowTxForm(false);
-              setShowCreate(true);
             }}
           />
         ) : (
-          <div></div>
-        )}
-        {showTxForm1 ? (
-          <TransactionFormAny
-            address={address}
-            accountOnChain={props.accountOnChain}
-            holdings={props.holdings}
-            closeForm={() => {
-              setShowTxForm1(false);
-              setShowCreate(true);
-            }}
-          />
-        ) : (
-          <div></div>
-        )}
-
-        {showCreate ? (
           <div className="interfaces">
             <div className="col-1">
-              <StackableContainer lessPadding>
-                <h2>New Send transaction</h2>
-                <p>
-                  Once a transaction is created, it can be signed by the
-                  multisig members, and then broadcast.
-                </p>
-                <Button
-                  label="Create Transaction"
-                  onClick={() => {
-                    setShowTxForm(true);
-                    setShowCreate(false);
-                  }}
-                />
-              </StackableContainer>
+              <MultisigHoldings holdings={props.holdings} />
             </div>
             <div className="col-2">
               <StackableContainer lessPadding>
-                <h2>Import transaction</h2>
+                <h2>ADD</h2>
                 <p>
-                  Import an already generated transaction
+                Add DIG chain to keplr
                 </p>
-                <br/>
                 <Button
-                  label="Import Transaction"
+                  label="Add DIG chain to keplr"
                   onClick={() => {
-                    setShowTxForm1(true);
-                    setShowCreate(false);
+                      console.log("vuong")
+                      if (!window.keplr) {
+                          alert("Please install keplr extension");
+                      }
+                      else {
+                        window.keplr.enable("cosmoshub-4");
+                        console.log("vuong")
+                        window.keplr.experimentalSuggestChain({
+                          chainId: "dig-1",
+                          chainName: "DIG",
+                          rpc: "http://65.21.202.37:8001",
+                          rest: "http://65.21.202.37:8003",
+                          bip44: {
+                              coinType: 118,
+                          },
+                          bech32Config: {
+                              bech32PrefixAccAddr: "dig",
+                              bech32PrefixAccPub: "dig" + "pub",
+                              bech32PrefixValAddr: "dig" + "valoper",
+                              bech32PrefixValPub: "dig" + "valoperpub",
+                              bech32PrefixConsAddr: "dig" + "valcons",
+                              bech32PrefixConsPub: "dig" + "valconspub",
+                          },
+                          currencies: [ 
+                              { 
+                                  coinDenom: "dig", 
+                                  coinMinimalDenom: "udig", 
+                                  coinDecimals: 6, 
+                                  coinGeckoId: "dig", 
+                              }, 
+                          ],
+                          feeCurrencies: [
+                              {
+                                  coinDenom: "dig",
+                                  coinMinimalDenom: "udig",
+                                  coinDecimals: 6,
+                                  coinGeckoId: "dig",
+                              },
+                          ],
+                          stakeCurrency: {
+                              coinDenom: "dig",
+                              coinMinimalDenom: "udig",
+                              coinDecimals: 6,
+                              coinGeckoId: "dig",
+                          },
+                          coinType: 118,
+                          gasPriceStep: {
+                              low: 0.01,
+                              average: 0.025,
+                              high: 0.03,
+                          },
+                      });                    
+                  }
+                  
                   }}
                 />
               </StackableContainer>
             </div>
           </div>
-        ):(
-          <div></div>
         )}
       </StackableContainer>
       <style jsx>{`

@@ -5,7 +5,6 @@ import { withRouter } from "next/router";
 import Button from "../inputs/Button";
 import StackableContainer from "../layout/StackableContainer";
 import Input from "../inputs/Input";
-import {checkAddressOsmoValid} from "../../lib/txCheck";
 
 class FindMultisigForm extends React.Component {
   constructor(props) {
@@ -27,14 +26,6 @@ class FindMultisigForm extends React.Component {
   handleSearch = async () => {
     this.setState({ processing: true });
 
-    //basic check
-    if(!checkAddressOsmoValid(this.state.address)){
-      window.alert("Invalid osmosis address format");
-      this.state.address = "";
-      this.setState({ processing: false });
-      return null;
-    }
-
     this.props.router.push(`/multi/${this.state.address}`);
   };
 
@@ -43,30 +34,21 @@ class FindMultisigForm extends React.Component {
       <StackableContainer>
         <StackableContainer lessPadding>
           <p>
-            Already have a multisig address? Enter it below. If it’s a valid
-            address, you will be able to view its transactions and create new
-            ones.
+          Already have a dig address? Enter it below. If it’s a valid address, you will be able to view its transactions and add dig-chain to keplr wallet
           </p>
         </StackableContainer>
         <StackableContainer lessPadding lessMargin>
           <Input
             onChange={this.handleChange}
             value={this.state.address}
-            label="Multisig Address"
+            label="Dig Address"
             name="address"
-            placeholder="osmo1ya403hmh5ehj2qp6uf0pa672ynjguc7aea4mpk"
+            placeholder="dig1vqpjljwsynsn58dugz0w8ut7kun7t8ls2qkmsq"
           />
           <Button
             label="Use this Multisig"
             onClick={this.handleSearch}
             primary
-          />
-        </StackableContainer>
-        <StackableContainer lessPadding>
-          <p className="create-help">Don't have a multisig?</p>
-          <Button
-            label="Create New Multisig"
-            onClick={() => this.props.router.push("create")}
           />
         </StackableContainer>
         <style jsx>{`
