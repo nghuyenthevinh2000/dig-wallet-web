@@ -46,7 +46,7 @@ class FindMultisigForm extends React.Component {
             placeholder="dig1vqpjljwsynsn58dugz0w8ut7kun7t8ls2qkmsq"
           />
           <Button
-            label="Use this Multisig"
+            label="Use this Address"
             onClick={this.handleSearch}
             primary
           />

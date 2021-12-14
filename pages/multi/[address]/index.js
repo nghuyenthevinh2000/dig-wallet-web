@@ -49,7 +49,7 @@ const multipage = (props) => {
     <Page>
       <StackableContainer base>
         <StackableContainer>
-          <label>Multisig Address</label>
+          <label>Address</label>
           <h1>
             <HashView hash={address} />
           </h1>
@@ -58,14 +58,14 @@ const multipage = (props) => {
           <StackableContainer>
             <div className="multisig-error">
               <p>
-                This multisig address's pubkeys are not available, and so it
+                This address's pubkeys are not available, and so it
                 cannot be used with this tool.
               </p>
               <p>
                 You can recreate it with this tool here, or sign and broadcast a
                 transaction with the tool you used to create it. Either option
                 will make the pubkeys accessible and will allow this tool to use
-                this multisig fully.
+                this fully.
               </p>
             </div>
           </StackableContainer>
